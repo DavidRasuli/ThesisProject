@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    Image, Button, ScrollView, StyleSheet,View,TouchableHighlight,Text
+    Image, Button, ScrollView, StyleSheet,ActivityIndicator
 } from 'react-native';
 import { PhotoGrid } from 'react-native-photo-grid-frame';
 import { itemsInList} from '../config/data';
@@ -23,10 +23,16 @@ class PictureManager extends Component {
 
     constructor() {
         super();
+
+
         this.state = {
             avatarSource: '',
+            id : null,
+            urls : null,
+            ready : false
         };
     }
+
 
     BrowseDevice = ()=> {
         ImagePicker.launchImageLibrary(options, (response)  => {
@@ -54,6 +60,32 @@ class PictureManager extends Component {
         });
     }
 
+    componentDidMount() {
+        if(this.props.navigation.state.params.imageUrls != null) {
+            alert("not null");
+            this.setState(
+                {
+                    urls: this.props.navigation.state.params.imageUrls.map(function (item) {
+                        return {url: item};
+                    }),
+                    ready : true
+                }
+            );
+        }
+        else {
+            alert("null");
+            this.setState(
+                {
+                    urls: [],
+                    ready: true
+                }
+            );
+        }
+        this.setState(
+            {ID : this.props.navigation.state.params.ID}
+        )
+        alert(this.state.ID);
+    }
 
     takeCameraPicture = ()=>{
         ImagePicker.launchCamera(options, (response)  => {
@@ -85,12 +117,44 @@ class PictureManager extends Component {
 
     };
 
-
-    render()
+    uploadPicture =() =>
     {
+
+        this.state.urls.push(this.state.avatarSource);
+
+        alert(this.state.urls.length);
+
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+             JSON.stringify({
+                "itemInListId": this.state.ID,
+                "imageUrls": this.state.urls
+
+            }),
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data;
+                alert(JSON.stringify(res));
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+
+    }
+
+
+    render() {
+        if (!this.state.ready) {
+            return (<ActivityIndicator/>);
+        }
         return (
             <ScrollView>
-                <PhotoGrid PhotosList={itemsInList.imageUrls} borderRadius={10}/>
+                <PhotoGrid PhotosList={this.state.urls} borderRadius={10}/>
                 <Button title="Take a picture"
                         onPress={() =>
                             this.takeCameraPicture()
@@ -101,7 +165,8 @@ class PictureManager extends Component {
                             this.BrowseDevice()
                         }
                 />
-                <Image source={this.state.avatarSource}  style={styles.imageShow}  />
+                <Image source={this.state.avatarSource} style={styles.imageShow}/>
+                <Button onPress={() => this.uploadPicture()} title="Upload image"/>
             </ScrollView>
         );
     }
@@ -114,7 +179,17 @@ const styles = StyleSheet.create(
                 width: 50,
                 height: 50
             },
+        buttonShow:
+            {
+                width: 50,
+                height: 50
+            },
+        buttonHide:
+            {
+                height: 0, opacity: 0,flex:0,width :0, fontSize :0
+            }
     }
+
 );
 
 export default PictureManager;

@@ -3,7 +3,7 @@ import {
     Text,
     View,
     ScrollView,
-    Button, ListView
+    Button, ListView,ActivityIndicator
 } from 'react-native';
 import { List, ListItem } from 'react-native-elements';
 import { shoppingLists } from '../config/data';
@@ -16,12 +16,13 @@ class MyLists extends  Component{
         super();
 
         this.state = {
+            ready:false,
             shoppingListDataSource: null,
         }
     }
 
     componentDidMount() {
-        //this.getShoppingLists(); // Call API
+        this.getShoppingLists(); // Call API
     }
 
     getShoppingLists = () => {
@@ -42,6 +43,7 @@ class MyLists extends  Component{
                 //alert('Data received (ShoppingListDetails):' +shoppingListObj[0].shoppingList.name )
 
                 this.setState({
+                    ready:true,
                     shoppingListDataSource:shoppingListObj
                 },function() {
                     // do something with new state
@@ -59,23 +61,22 @@ class MyLists extends  Component{
     };
 
     render() {
+        if (!this.state.ready) {
+            return ( <ActivityIndicator/> );
+        }
         return (
+
             <ScrollView>
                 <List>
-                    {shoppingLists.map((shoppingList) => (
+                    {this.state.shoppingListDataSource.map((shoppingList) => (
                         <ListItem
-                            key={shoppingList.id}
-                            avatar={{ uri: shoppingList.picture }}
-                            title={`${shoppingList.name.toUpperCase()} (${shoppingList.id})`}
+                            key={shoppingList.shoppingList.ID}
+                            //avatar={{ uri: shoppingList.shoppingList.active }}
+                            title={`${shoppingList.shoppingList.name.toUpperCase()} (${shoppingList.shoppingList.ID})`}
                             onPress={() => this.onLearnMore(shoppingList)}
                         />
                     ))}
                 </List>
-                <Button title="Go to Picture's profile"
-                        onPress={() =>
-                            this.props.navigation.navigate('PictureManager',{...shoppingLists})
-                        }
-                />
             </ScrollView>
 
         );

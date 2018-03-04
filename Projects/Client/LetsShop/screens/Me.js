@@ -44,7 +44,7 @@ class Me extends Component {
                 user:participant
             },function() {
                 // do something with new state
-                alert('Component did mount : user :' +this.state.user.email )
+                //alert('Component did mount : user :' +this.state.user )
             });
             /*
             alert(data.participant.firstName);
@@ -68,7 +68,7 @@ class Me extends Component {
             <ScrollView>
 
                 <Tile
-                    imageSrc={{uri: this.props.picture.large}}
+                    imageSrc={{uri: this.state.user.imageUrl}}
                     featured
                     title={`${this.state.user.firstName.toUpperCase()} ${this.state.user.lastName.toUpperCase()}`}
                     caption={this.props.email}
@@ -96,7 +96,7 @@ class Me extends Component {
                 <List>
                     <ListItem
                         title="Nickname"
-                        rightTitle={this.state.user.nickname}
+                        rightTitle={this.state.user.nickname.toUpperCase()}
                         hideChevron
                     />
                 </List>

@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @DynamoDBTable(tableName="ItemsInLists")
 public class ItemInList {
@@ -26,6 +27,10 @@ public class ItemInList {
 	private boolean available;
 
 	private boolean suggestion;
+
+	private List<String> imageUrls;
+
+	private String name;
 
 	/**
 	 * The id will be of an ItemInList record.
@@ -78,6 +83,19 @@ public class ItemInList {
 		return suggestionItemId;
 	}
 
+	@DynamoDBAttribute(attributeName="ImageUrls")
+	public List<String> getImageUrls()
+	{
+		return imageUrls;
+	}
+
+	//TODO : consider removing Item class
+	@DynamoDBAttribute(attributeName = "Name")
+	public String getName()
+	{
+		return name;
+	}
+
 	public void setID(String ID) {
 		this.ID = ID;
 	}
@@ -114,6 +132,17 @@ public class ItemInList {
 		this.suggestionItemId = suggestionId;
 	}
 
+	public void setImageUrls(List<String> imageUrls)
+	{
+		this.imageUrls = null;
+		this.imageUrls = imageUrls;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
 	public ItemInList(String listId, String itemId, int measureVolume, String measureUnit, boolean available, boolean suggestion, String suggestionItemId) {
 		this.listId = listId;
 		this.itemId = itemId;
@@ -126,4 +155,6 @@ public class ItemInList {
 	}
 
 	public ItemInList(){creationDate = LocalDateTime.now();}
+
+
 }

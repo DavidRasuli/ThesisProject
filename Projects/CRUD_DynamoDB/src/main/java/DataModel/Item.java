@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 import java.time.LocalDateTime;
 
+//TODO : consider removing Item class
 @DynamoDBTable(tableName="Items")
 public class Item {
 

@@ -39,8 +39,9 @@ class ShoppingListDetails extends Component {
 
 
     fetchUsers() {
+
         this.setState({
-            shoppingListDataSource: this.state.shoppingListDataSource.cloneWithRows(this.props.navigation.state.params.itemsInList)
+            shoppingListDataSource: this.state.shoppingListDataSource.cloneWithRows(this.props.navigation.state.params.itemInLists)
         });
     }
 
@@ -189,13 +190,16 @@ class ShoppingListDetails extends Component {
         //todo
     }
 
-    onLearnMore = (shoppingList)=>{
-        this.props.navigation.navigate('ImagesDetail',{...shoppingList});
+    onLearnMore = (itemInList)=>{
+        this.props.navigation.navigate('ImagesDetail',{...itemInList});
 
     };
 
 
     renderRow(shoppingListRow, sectionId, rowId, highlightRow) {
+
+
+
         return (
 
             <View style={styles.row}>
@@ -207,23 +211,24 @@ class ShoppingListDetails extends Component {
                     />
                 </TouchableHighlight>
                 <Text style={styles.productNameStyle}>{shoppingListRow.name}</Text>
-                <Text style={styles.productQtyStyle}>{shoppingListRow.volume} </Text>
-                <Text style={styles.measurementUnitStyle}>{shoppingListRow.measurementUnit}</Text>
+                <Text style={styles.productQtyStyle}>{shoppingListRow.measureVolume} </Text>
+                <Text style={styles.measurementUnitStyle}>{shoppingListRow.measureUnit}</Text>
                 <Text style={styles.show}></Text>
-                <TouchableHighlight onPress={() => this.onLearnMore(shoppingListRow)} style={this.state.plus_highlight}>
-                    <Image
 
-                        style={this.state.add_comment}
-                        source={require('./../Images/Images.png')}
-                    />
-                </TouchableHighlight>
+                    <TouchableHighlight onPress={() => this.onLearnMore(shoppingListRow)}
+                                        style={this.state.plus_highlight}>
+                        <Image
+
+                            style={this.state.add_comment}
+                            source={require('./../Images/Images.png')}
+                        />
+                    </TouchableHighlight>
+
             </View>
         )
     }
 
     render() {
-        const {name, measurementUnit, volume} = this.props.navigation.state.params.itemsInList;
-        const {nameOfList} = this.props.navigation.state.params.name;
 
         return (
             <View>
@@ -309,17 +314,17 @@ const styles = StyleSheet.create(
             },
         productNameStyle:
             {
-                flex:5,
+                flex:8,
                 padding:10,
             },
         productQtyStyle:
             {
-                flex:3,
+                flex:1,
                 padding:10,
             },
         measurementUnitStyle:
             {
-                flex:3,
+                flex:1,
                 padding:10,
             },
         show:

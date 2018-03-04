@@ -108,7 +108,7 @@ public class ShoppingList{
 		this.endedAt = DateFormatting.setToFormattedDate(endedAt);
 	}
 
-	public void getItemInListIds(List<String> itemInListIds)
+	public void setItemInListIds(List<String> itemInListIds)
 	{
 		this.itemInListIds = itemInListIds;
 	}
@@ -127,4 +127,5 @@ public class ShoppingList{
 	{
 		this.creationDate = LocalDateTime.now();
 	}
+
 }
