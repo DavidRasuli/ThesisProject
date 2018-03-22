@@ -3,7 +3,6 @@ import {
     Image, Button, ScrollView, StyleSheet,ActivityIndicator
 } from 'react-native';
 import { PhotoGrid } from 'react-native-photo-grid-frame';
-import { itemsInList} from '../config/data';
 var ImagePicker = require('react-native-image-picker');
 
 //Need to learn about this
@@ -27,8 +26,7 @@ class PictureManager extends Component {
 
         this.state = {
             avatarSource: '',
-            id : null,
-            urls : null,
+            itemInList : null,
             ready : false
         };
     }
@@ -60,31 +58,33 @@ class PictureManager extends Component {
         });
     }
 
-    componentDidMount() {
+
+
+    componentWillMount() {
         if(this.props.navigation.state.params.imageUrls != null) {
-            alert("not null");
             this.setState(
                 {
-                    urls: this.props.navigation.state.params.imageUrls.map(function (item) {
+                    itemInList:this.props.navigation.state.params,
+
+                    /*
+                    this.props.navigation.state.params.imageUrls.map(function (item) {
                         return {url: item};
                     }),
+                     */
+
                     ready : true
                 }
             );
         }
         else {
-            alert("null");
+
             this.setState(
                 {
-                    urls: [],
+
                     ready: true
                 }
             );
         }
-        this.setState(
-            {ID : this.props.navigation.state.params.ID}
-        )
-        alert(this.state.ID);
     }
 
     takeCameraPicture = ()=>{
@@ -119,10 +119,14 @@ class PictureManager extends Component {
 
     uploadPicture =() =>
     {
+        var urls = this.state.itemInList.imageUrls;
 
-        this.state.urls.push(this.state.avatarSource);
+        urls.push(this.state.avatarSource.uri);
 
-        alert(this.state.urls.length);
+        debugger;
+        urls = urls.map(function (item) {
+                    return item;
+                });
 
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
         fetch( url,{
@@ -132,20 +136,26 @@ class PictureManager extends Component {
             ,
             body:
              JSON.stringify({
-                "itemInListId": this.state.ID,
-                "imageUrls": this.state.urls
-
+                "itemInListId": this.state.itemInList.ID,
+                "imageUrls": urls,
+                 "measurementVolume" : this.state.itemInList.measurementVolume,
+                 "measurementUnit" : this.state.itemInList.measurementUnit,
+                 "itemName" : this.state.itemInList.itemName,
+                 "available" : this.state.itemInList.available,
+                 "alternativeItem" : this.state.itemInList.alternativeItem
             }),
         }).then((response) => response.json())
             .then((data) =>
             {
-                let res = data;
-                alert(JSON.stringify(res));
+                let res = data.toString();
+                alert("response : "+JSON.stringify( res));
             }).catch((error) => {
             alert("error : " +error);
         });
 
     }
+
+
 
 
     render() {
@@ -154,7 +164,13 @@ class PictureManager extends Component {
         }
         return (
             <ScrollView>
-                <PhotoGrid PhotosList={this.state.urls} borderRadius={10}/>
+                <PhotoGrid
+                    PhotosList=
+                        {this.state.itemInList.imageUrls.map(function (item) {
+                                                                        return {url: item};
+                                                                    })
+                        }
+                    borderRadius={10}/>
                 <Button title="Take a picture"
                         onPress={() =>
                             this.takeCameraPicture()
@@ -165,7 +181,7 @@ class PictureManager extends Component {
                             this.BrowseDevice()
                         }
                 />
-                <Image source={this.state.avatarSource} style={styles.imageShow}/>
+                <Image source={ this.state.avatarSource} style={styles.imageShow}/>
                 <Button onPress={() => this.uploadPicture()} title="Upload image"/>
             </ScrollView>
         );

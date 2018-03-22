@@ -1,23 +1,50 @@
 import React, { Component } from 'react';
-import { ScrollView,ActivityIndicator } from 'react-native';
-import { Tile, List, ListItem, Button } from 'react-native-elements';
-import { me } from '../config/data';
+import {ScrollView, ActivityIndicator, TextInput, StyleSheet ,Switch,View,Text} from 'react-native';
+import { Tile, ListItem, Button } from 'react-native-elements';
 
 class Me extends Component {
     handleSettingsPress = () => {
         //this.props.navigation.navigate('Settings');
         //https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging
 
+        if(this.state.isEdit == true)
+        {
+            this.setState({
+                settingsMode:"Edit Details",
+                isEdit : false
+            })
+            //update api
+            this.updateUser();
+            //set state to Edit Details
+
+        }
+        else //this.state.isEdit == false
+        {
+            this.setState({
+                settingsMode:"Done",
+                isEdit : true
+            });
+            //allow edit
+            //set state to Done
+
+        }
+
+
     };
-    constructor(props)
+    constructor()
     {
-        super(props);
+        super();
         this.state = {
             user : null,
-            ready : false
-        }
-    }
+            ready : false,
+            isEdit : false,
+            settingsMode : "Edit Details",
+            email: "",
+            nickName: "",
+            showNotifications: false,
 
+        };
+    }
 
     componentDidMount()
     {
@@ -26,37 +53,74 @@ class Me extends Component {
 
     getUser = () => {
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/getparticipantbyid";
-          fetch( url,{
+        fetch( url,{
             method: 'POST',
             headers:
                 new Headers({'Content-Type': 'application/json'})
             ,
             body:
                 JSON.stringify(
-                "10f53f45-d49d-437c-bf36-fa51b87bd34d")
+                    "10f53f45-d49d-437c-bf36-fa51b87bd34d")
         }).then((response) => response.json())
-              .then((data) =>
-        {
-            let participant = data.participant;
-            //alert(participant);
-            this.setState({
-                ready:true,
-                user:participant
-            },function() {
-                // do something with new state
-                //alert('Component did mount : user :' +this.state.user )
-            });
-            /*
-            alert(data.participant.firstName);
-            this.state({
-                ready:true,
-                user:data.participant
-            });
-            */
-        }).catch((error) => {
-              alert("error : " +error);
-          });
+            .then((data) =>
+            {
+                let participant = data.participant;
+                //alert(participant);
+                this.setState({
+                    ready:true,
+                    user:participant,
+                    email: participant.email,
+                    nickName : participant.nickname,
+                    showNotifications : participant.showNotifications
+                });
+
+                /*
+                alert(data.participant.firstName);
+                this.state({
+                    ready:true,
+                    user:data.participant
+                });
+                */
+            }).catch((error) => {
+            alert("error : " +error);
+        });
     }
+
+
+    updateUser =() =>
+    {
+
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/editparticipant";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    "participantId": this.state.user.ID,
+                    "nickName": this.state.nickName,
+                    "email" : this.state.email,
+                    "allowSettings" : this.state.showNotifications,
+                }),
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let participant = data.participant;
+                this.setState({
+                    ready:true,
+                    user:participant,
+                    email: participant.email,
+                    nickName : participant.nickname,
+                    showNotifications : participant.showNotifications
+                });
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+
+    }
+
+
 
     render() {
         if (!this.state.ready) {
@@ -75,45 +139,101 @@ class Me extends Component {
                 />
 
                 <Button
-                    title="Settings"
+                    title={this.state.settingsMode}
                     buttonStyle={{marginTop: 20}}
                     onPress={this.handleSettingsPress}
                 />
 
-                <List>
-                    <ListItem
-                        title="Email"
-                        rightTitle={this.state.user.email.toUpperCase()}
-                        hideChevron
-                    />
-                    <ListItem
-                        title="Phone"
-                        rightTitle={this.state.user.phone.toUpperCase()}
-                        hideChevron
-                    />
-                </List>
+                <View style={styles.row}>
+                    <Text style={styles.desc}>
+                        Email :
+                    </Text>
 
-                <List>
-                    <ListItem
-                        title="Nickname"
-                        rightTitle={this.state.user.nickname.toUpperCase()}
-                        hideChevron
-                    />
-                </List>
+                    {this.state.isEdit == false &&
+                    <Text style={styles.data}>
+                        {this.state.email}
+                    </Text>
+                    }
 
-                <List>
-                    <ListItem
-                        title="Birthday"
-                        rightTitle={this.state.user.dateOfBirth.split('T')[0]}
-                        hideChevron
+                    {this.state.isEdit &&
+
+                    <TextInput style={styles.data}
+                               value={this.state.email}
+                               onChangeText ={(value) => this.setState({ email : value})}
                     />
-                </List>
+                    }
+                </View>
+
+                <View style={styles.row}>
+
+                    <Text style={styles.desc}>
+                        Nickname :
+                    </Text>
+
+                    {this.state.isEdit == false &&
+                    <Text style={styles.data}>
+                        {
+                            this.state.nickName
+                        }
+                    </Text>
+                    }
+                    {this.state.isEdit &&
+                    <TextInput style={styles.data}
+                               value={
+                                   this.state.nickName
+                               }
+                               onChangeText ={
+                                   (value) =>
+                                       this.setState({
+                                           nickName : value
+                                       })}
+                    />
+                    }
+                </View>
+
+                <View style={styles.row}>
+
+                    <Text style={styles.desc}>
+                        Allow notifications :
+                    </Text>
+
+                    <Switch
+                        style={styles.data}
+                        disabled={this.state.isEdit == false}
+                        value={this.state.showNotifications}
+                        onValueChange={
+                            (value) =>
+                                this.setState({
+                                     showNotifications: value
+                                })}
+                    />
+
+                </View>
+
             </ScrollView>
         );
 
     }
 }
-
-Me.defaultProps = { ...me };
+const styles = StyleSheet.create(
+    {
+        desc:
+            {
+                flex:1,
+                padding:10,
+            },
+        data:
+            {
+                flex:2,
+                padding:10
+            },
+        row:
+            {
+                flexDirection:'row',
+                justifyContent:'center',
+                marginBottom:1,
+                backgroundColor: 'ghostwhite'
+            },
+    });
 
 export default Me;

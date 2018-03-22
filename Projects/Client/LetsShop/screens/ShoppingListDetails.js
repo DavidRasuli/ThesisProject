@@ -340,13 +340,12 @@ const styles = StyleSheet.create(
         blankLeft:
             {
                 textAlign: 'center',
-                fontSize: 18,
                 flex:9,
                 padding:10,
             },
         hide:
             {
-                height: 0, opacity: 0,flex:0,width :0, fontSize :0
+                height: 0, opacity: 0,flex:0,width :0
             },
         imageHide:
             {
