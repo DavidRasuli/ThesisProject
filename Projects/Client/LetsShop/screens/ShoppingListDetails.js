@@ -13,7 +13,7 @@ class ShoppingListDetails extends Component {
 
 
         this.state = {
-
+            shoppingListId : null,
             shoppingListDataSource: ds,
             productName: 'Enter product',
             productQty: 'Quantity',
@@ -38,15 +38,16 @@ class ShoppingListDetails extends Component {
     }
 
 
-    fetchUsers() {
+    fetchShoppingItems() {
 
         this.setState({
+            shoppingListId : this.props.navigation.state.params.shoppingList.ID,
             shoppingListDataSource: this.state.shoppingListDataSource.cloneWithRows(this.props.navigation.state.params.itemInLists)
         });
     }
 
     componentDidMount() {
-        this.fetchUsers();
+        this.fetchShoppingItems();
     }
 
     addItemClicked = () => {
@@ -180,19 +181,44 @@ class ShoppingListDetails extends Component {
         //move to participants activity
     }
 
-    onAddCommentClicked()
+    onAddCommentClicked = () =>
     {
-        //todo
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/appenditemtoshoppinglist";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    //"itemInListId": this.state.itemInList.ID,
+                    "listId" : this.state.shoppingListId ,
+                    //"imageUrls": this.state.itemInList.urls,
+                    "measurementVolume" : this.state.productQty,
+                    "measurementUnit" : this.state.measurementUnit,
+                    "itemName" : this.state.productName,
+                    //"available" : this.state.itemInList.available,
+                    //"alternativeItem" : this.state.itemInList.alternativeItem,
+                    //"comments" : comments
+                }),
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data.toString();
+                alert("response : "+JSON.stringify( res));
+            }).catch((error) => {
+            alert("error : " +error);
+        });
     }
 
-    onCommentsClicked()
-    {
-        //todo
-    }
 
-    onLearnMore = (itemInList)=>{
+    navigateToImages = (itemInList)=>{
         this.props.navigation.navigate('ImagesDetail',{...itemInList});
 
+    };
+
+    navigateToComments = (itemInList)=>{
+        this.props.navigation.navigate('Notes',{...itemInList});
     };
 
 
@@ -203,7 +229,7 @@ class ShoppingListDetails extends Component {
         return (
 
             <View style={styles.row}>
-                <TouchableHighlight onPress={() => this.onAddCommentClicked(shoppingListRow)} style={this.state.plus_highlight}>
+                <TouchableHighlight onPress={() => this.navigateToComments(shoppingListRow)} style={this.state.plus_highlight}>
                     <Image
 
                         style={this.state.add_comment}
@@ -215,7 +241,7 @@ class ShoppingListDetails extends Component {
                 <Text style={styles.measurementUnitStyle}>{shoppingListRow.measureUnit}</Text>
                 <Text style={styles.show}></Text>
 
-                    <TouchableHighlight onPress={() => this.onLearnMore(shoppingListRow)}
+                    <TouchableHighlight onPress={() => this.navigateToImages(shoppingListRow)}
                                         style={this.state.plus_highlight}>
                         <Image
 
@@ -246,16 +272,31 @@ class ShoppingListDetails extends Component {
                     <TextInput
                         style={this.state.productName_style}
                         value={this.state.productName}
+                        onChangeText ={
+                            (value) =>
+                                this.setState({
+                                    productName : value
+                                })}
                     />
 
                     <TextInput
                         style={this.state.productQty_style}
                         value={this.state.productQty}
+                        onChangeText ={
+                            (value) =>
+                                this.setState({
+                                    productQty : value
+                                })}
                     />
 
                     <TextInput
                         style={this.state.measurementUnit_style}
                         value={this.state.measurementUnit}
+                        onChangeText ={
+                            (value) =>
+                                this.setState({
+                                    measurementUnit : value
+                                })}
                     />
 
 
@@ -275,7 +316,7 @@ class ShoppingListDetails extends Component {
                         />
                     </TouchableHighlight>
 
-                    <TouchableHighlight onPress={this.addItemClicked} style={this.state.minus_highlight} >
+                    <TouchableHighlight onPress={this.onAddCommentClicked} style={this.state.minus_highlight} >
                         <Image
 
                             style={this.state.minus_image}

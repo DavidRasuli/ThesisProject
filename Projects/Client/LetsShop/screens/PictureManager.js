@@ -138,11 +138,14 @@ class PictureManager extends Component {
              JSON.stringify({
                 "itemInListId": this.state.itemInList.ID,
                 "imageUrls": urls,
-                 "measurementVolume" : this.state.itemInList.measurementVolume,
-                 "measurementUnit" : this.state.itemInList.measurementUnit,
-                 "itemName" : this.state.itemInList.itemName,
+                 "measurementVolume" : this.state.itemInList.measureVolume,
+                 "measurementUnit" : this.state.itemInList.measureUnit,
+                 "name" : this.state.itemInList.name,
                  "available" : this.state.itemInList.available,
-                 "alternativeItem" : this.state.itemInList.alternativeItem
+                 "alternativeItem" : this.state.itemInList.alternativeItem,
+                 "comments" : this.state.itemInList.comments,
+                 
+
             }),
         }).then((response) => response.json())
             .then((data) =>

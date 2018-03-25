@@ -6,6 +6,7 @@ import MyLists from '../screens/MyLists';
 import Me from '../screens/Me';
 import ShoppingListDetails from '../screens/ShoppingListDetails';
 import PictureManager from "../screens/PictureManager";
+import ItemNotes from "../screens/ItemNotes"
 
 export const MyListsStack = StackNavigator({
     MyList:{
@@ -25,6 +26,12 @@ export const MyListsStack = StackNavigator({
         navigationOptions: ({ navigation }) => ({
             title: `${navigation.state.params.name.toUpperCase()}`,
         }), //D.R. : now we'd like to get the first and last name from the navigation , is thia
+    },
+    Notes : {
+        screen: ItemNotes,
+        navigationOptions: ({ navigation }) => ({
+            title: `${navigation.state.params.name.toUpperCase()}`,
+        }), //
     }
 });
 

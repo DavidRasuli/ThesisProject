@@ -67,7 +67,7 @@ public class CreateTestData {
     {
             for(int i=0; i < count; i++)
             {
-                ItemInList itemInList = new ItemInList(getExistingListId(),getExistingItemId(),i,"KG",true,true,getExistingItemId());
+                ItemInList itemInList = new ItemInList(getExistingListId(),getExistingItemId(),i,"KG",true,true,getExistingItemId(),"name_" + i);
                 DataAccess.getInstance().save(itemInList);
             }
     }

@@ -30,6 +30,8 @@ public class ItemInList {
 
 	private List<String> imageUrls;
 
+	private List<String> comments;
+
 	private String name;
 
 	/**
@@ -89,6 +91,12 @@ public class ItemInList {
 		return imageUrls;
 	}
 
+	@DynamoDBAttribute(attributeName="Comments")
+	public List<String> getComments()
+	{
+		return comments;
+	}
+
 	//TODO : consider removing Item class
 	@DynamoDBAttribute(attributeName = "Name")
 	public String getName()
@@ -138,12 +146,18 @@ public class ItemInList {
 		this.imageUrls = imageUrls;
 	}
 
+	public void setComments(List<String> comments)
+	{
+		this.comments = null;
+		this.comments = comments;
+	}
+
 	public void setName(String name)
 	{
 		this.name = name;
 	}
 
-	public ItemInList(String listId, String itemId, int measureVolume, String measureUnit, boolean available, boolean suggestion, String suggestionItemId) {
+	public ItemInList(String listId, String itemId, int measureVolume, String measureUnit, boolean available, boolean suggestion, String suggestionItemId,String name) {
 		this.listId = listId;
 		this.itemId = itemId;
 		this.creationDate = LocalDateTime.now();
@@ -152,6 +166,7 @@ public class ItemInList {
 		this.available = available;
 		this.suggestion = suggestion;
 		this.suggestionItemId = suggestionItemId;
+		this.name = name;
 	}
 
 	public ItemInList(){creationDate = LocalDateTime.now();}
