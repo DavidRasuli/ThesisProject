@@ -61,30 +61,18 @@ class PictureManager extends Component {
 
 
     componentWillMount() {
-        if(this.props.navigation.state.params.imageUrls != null) {
-            this.setState(
-                {
-                    itemInList:this.props.navigation.state.params,
+        this.setState(
+            {
+                itemInList: this.props.navigation.state.params,
 
-                    /*
-                    this.props.navigation.state.params.imageUrls.map(function (item) {
-                        return {url: item};
-                    }),
-                     */
+                /*
+                this.props.navigation.state.params.imageUrls.map(function (item) {
+                    return {url: item};
+                }),
+                 */
 
-                    ready : true
-                }
-            );
-        }
-        else {
-
-            this.setState(
-                {
-
-                    ready: true
-                }
-            );
-        }
+                ready: true
+            });
     }
 
     takeCameraPicture = ()=>{
@@ -119,14 +107,9 @@ class PictureManager extends Component {
 
     uploadPicture =() =>
     {
-        var urls = this.state.itemInList.imageUrls;
+        var urls = this.state.itemInList.imageUrls ? this.state.itemInList.imageUrls : [];
 
         urls.push(this.state.avatarSource.uri);
-
-        debugger;
-        urls = urls.map(function (item) {
-                    return item;
-                });
 
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
         fetch( url,{
@@ -140,11 +123,10 @@ class PictureManager extends Component {
                 "imageUrls": urls,
                  "measurementVolume" : this.state.itemInList.measureVolume,
                  "measurementUnit" : this.state.itemInList.measureUnit,
-                 "name" : this.state.itemInList.name,
+                 "itemName" : this.state.itemInList.name,
                  "available" : this.state.itemInList.available,
                  "alternativeItem" : this.state.itemInList.alternativeItem,
                  "comments" : this.state.itemInList.comments,
-                 
 
             }),
         }).then((response) => response.json())
@@ -169,9 +151,9 @@ class PictureManager extends Component {
             <ScrollView>
                 <PhotoGrid
                     PhotosList=
-                        {this.state.itemInList.imageUrls.map(function (item) {
+                        { this.state.itemInList.imageUrls ? this.state.itemInList.imageUrls.map(function (item) {
                                                                         return {url: item};
-                                                                    })
+                                                                    }) : []
                         }
                     borderRadius={10}/>
                 <Button title="Take a picture"

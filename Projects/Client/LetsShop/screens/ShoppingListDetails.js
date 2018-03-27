@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { ScrollView,View,ListView ,Text,StyleSheet,Button, TouchableHighlight,Image,TextInput} from 'react-native';
+import { ScrollView,View,ListView ,Text,StyleSheet,Button, TouchableHighlight,Image,TextInput,Picker} from 'react-native';
+import CheckBox from 'react-native-check-box';
 
 class ShoppingListDetails extends Component {
 
@@ -221,6 +222,71 @@ class ShoppingListDetails extends Component {
         this.props.navigation.navigate('Notes',{...itemInList});
     };
 
+    getFirstPicture(shoppingListRow)
+    {
+        var imageUrl;
+        if(shoppingListRow.imageUrls != null && shoppingListRow.imageUrls.length > 0 )
+        {
+            imageUrl = {uri :  shoppingListRow.imageUrls[0]};
+        }
+        else
+        {
+            imageUrl = require('./../Images/ImageAdd.png');
+        }
+        return imageUrl;
+    }
+
+
+
+    updateItemAvailability = (available) =>
+    {
+        if(available)
+        {
+            return;// only update if a change occurred
+        }
+        return;
+
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/appenditemtoshoppinglist";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    "itemInListId": item.ID,
+                    "listId" : item.shoppingListId ,
+                    "imageUrls": item.urls,
+                    "measurementVolume" : item.productQty,
+                    "measurementUnit" : item.measurementUnit,
+                    "itemName" : item.productName,
+                    "available" : available,
+                    "alternativeItem" : item.alternativeItem,
+                    "comments" : item.comments
+                }),
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data.toString();
+                alert("response : "+JSON.stringify( res));
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+    }
+
+    renderCheckBox(data) {
+        var leftText = data.name;
+        return (
+            <CheckBox
+                style={styles.itemAvailablityStyle}
+                onClick={()=>this.onClick(data)}
+                isChecked={data.checked}
+                leftText={leftText}
+                checkedImage={<Image source={require('./../Images/Check.png')} />}
+                //unCheckedImage={<Image source={require('../../page/my/img/ic_check_box_outline_blank.png')} style={this.props.theme.styles.tabBarSelectedIcon}/>}
+            />);
+    }
+
 
     renderRow(shoppingListRow, sectionId, rowId, highlightRow) {
 
@@ -229,6 +295,31 @@ class ShoppingListDetails extends Component {
         return (
 
             <View style={styles.row}>
+
+                <TouchableHighlight onPress={() => this.navigateToImages(shoppingListRow)}
+                                    style={this.state.plus_highlight}>
+                    <Image
+
+                        style={this.state.add_comment}
+                        source={this.getFirstPicture(shoppingListRow)}  //{require('./../Images/Images.png')}
+                    />
+                </TouchableHighlight>
+
+                <Text style={styles.productNameStyle}>{shoppingListRow.name}</Text>
+                <Text style={styles.productQtyStyle}>{shoppingListRow.measureVolume} </Text>
+                <Text style={styles.measurementUnitStyle}>{shoppingListRow.measureUnit}</Text>
+
+
+                <CheckBox
+                    style={styles.itemAvailablityStyle}
+                    //onClick={()=>this.onClick(data)}
+                    isChecked={shoppingListRow.available}
+                    //leftText={leftText}
+                    checkedImage={<Image source={require('./../Images/Check.png')} />}
+                    //unCheckedImage={<Image source={require('../../page/my/img/ic_check_box_outline_blank.png')} style={this.props.theme.styles.tabBarSelectedIcon}/>}
+                />
+
+
                 <TouchableHighlight onPress={() => this.navigateToComments(shoppingListRow)} style={this.state.plus_highlight}>
                     <Image
 
@@ -236,20 +327,6 @@ class ShoppingListDetails extends Component {
                         source={require('./../Images/AddComment.png')}
                     />
                 </TouchableHighlight>
-                <Text style={styles.productNameStyle}>{shoppingListRow.name}</Text>
-                <Text style={styles.productQtyStyle}>{shoppingListRow.measureVolume} </Text>
-                <Text style={styles.measurementUnitStyle}>{shoppingListRow.measureUnit}</Text>
-                <Text style={styles.show}></Text>
-
-                    <TouchableHighlight onPress={() => this.navigateToImages(shoppingListRow)}
-                                        style={this.state.plus_highlight}>
-                        <Image
-
-                            style={this.state.add_comment}
-                            source={require('./../Images/Images.png')}
-                        />
-                    </TouchableHighlight>
-
             </View>
         )
     }
@@ -257,81 +334,81 @@ class ShoppingListDetails extends Component {
     render() {
 
         return (
-            <View>
-                <ListView
-                    dataSource={this.state.shoppingListDataSource}
-                    renderRow={this.renderRow.bind(this)}
-                />
-
-                <View style={styles.row}>
-
-                    <Text
-                        style={this.state.blankLeft_style}
-                    >Enter new product</Text>
-
-                    <TextInput
-                        style={this.state.productName_style}
-                        value={this.state.productName}
-                        onChangeText ={
-                            (value) =>
-                                this.setState({
-                                    productName : value
-                                })}
-                    />
-
-                    <TextInput
-                        style={this.state.productQty_style}
-                        value={this.state.productQty}
-                        onChangeText ={
-                            (value) =>
-                                this.setState({
-                                    productQty : value
-                                })}
-                    />
-
-                    <TextInput
-                        style={this.state.measurementUnit_style}
-                        value={this.state.measurementUnit}
-                        onChangeText ={
-                            (value) =>
-                                this.setState({
-                                    measurementUnit : value
-                                })}
+            <ScrollView>
+                <View>
+                    <ListView
+                        dataSource={this.state.shoppingListDataSource}
+                        renderRow={this.renderRow.bind(this)}
                     />
 
 
+                    <View style={styles.row}>
 
-                    <TouchableHighlight onPress={this.addItemClicked} style={this.state.plus_highlight}>
-                        <Image
+                        <TouchableHighlight onPress={this.addItemClicked} style={this.state.plus_highlight}>
+                            <Image
 
-                            style={this.state.plus_image}
-                            source={require('./../Images/Plus.png')}
+                                style={this.state.plus_image}
+                                source={require('./../Images/Plus.png')}
+                            />
+                        </TouchableHighlight>
+
+                        <TouchableHighlight onPress={this.cancelItemClicked} style={this.state.minus_highlight}>
+                            <Image
+                                style={this.state.minus_image}
+                                source={require('./../Images/Minus.png')}
+                            />
+                        </TouchableHighlight>
+
+                        <Text
+                            style={this.state.blankLeft_style}
+                        >Add a product...</Text>
+
+                        <TextInput
+                            style={this.state.productName_style}
+                            value={this.state.productName}
+                            onChangeText ={
+                                (value) =>
+                                    this.setState({
+                                        productName : value
+                                    })}
                         />
-                    </TouchableHighlight>
 
-                    <TouchableHighlight onPress={this.cancelItemClicked} style={this.state.minus_highlight}>
-                        <Image
-                            style={this.state.minus_image}
-                            source={require('./../Images/Minus.png')}
+                        <TextInput
+                            style={this.state.productQty_style}
+                            value={this.state.productQty}
+                            onChangeText ={
+                                (value) =>
+                                    this.setState({
+                                        productQty : value
+                                    })}
                         />
-                    </TouchableHighlight>
 
-                    <TouchableHighlight onPress={this.onAddCommentClicked} style={this.state.minus_highlight} >
-                        <Image
-
-                            style={this.state.minus_image}
-                            source={require('./../Images/Add.png')}
+                        <TextInput
+                            style={this.state.measurementUnit_style}
+                            value={this.state.measurementUnit}
+                            onChangeText ={
+                                (value) =>
+                                    this.setState({
+                                        measurementUnit : value
+                                    })}
                         />
-                    </TouchableHighlight>
 
-                    <View
-                        style={this.state.blankRight_style}
-                    />
+                        <TouchableHighlight onPress={this.onAddCommentClicked} style={this.state.minus_highlight} >
+                            <Image
+
+                                style={this.state.minus_image}
+                                source={require('./../Images/Add.png')}
+                            />
+                        </TouchableHighlight>
+
+                        <View
+                            style={this.state.blankRight_style}
+                        />
+
+                    </View>
 
                 </View>
-
-            </View>
-
+            </ScrollView>
         );
     }
 }
@@ -349,40 +426,55 @@ const styles = StyleSheet.create(
         row:
             {
                 flexDirection:'row',
-                justifyContent:'center',
+                justifyContent: 'center',
+                alignItems: 'center',
                 marginBottom:1,
                 backgroundColor: 'ghostwhite'
             },
         productNameStyle:
             {
-                flex:8,
-                padding:10,
+                fontSize : 22,
+                flex:5,
+                padding:8,
             },
         productQtyStyle:
             {
-                flex:1,
-                padding:10,
+                fontSize : 22,
+                flex:2,
+                padding:2,
             },
         measurementUnitStyle:
             {
+                fontSize : 22,
+                flex:2,
+                padding:2,
+            },
+        itemAvailablityStyle:
+            {
                 flex:1,
-                padding:10,
+                padding:2,
+                width: 50,
+                height: 50,
+                justifyContent: 'center',
+                alignItems: 'center',
             },
         show:
             {
                 flex: 2,
-                padding :10,
+                padding :8,
             },
         blankRight:
             {
                 flex: 1,
-                padding :10,
+                padding :8,
             },
         blankLeft:
             {
-                textAlign: 'center',
+                fontSize : 22,
+                justifyContent: 'center',
+                alignItems: 'center',
                 flex:9,
-                padding:10,
+                padding:4,
             },
         hide:
             {
@@ -400,18 +492,18 @@ const styles = StyleSheet.create(
             },
         addComment:
             {
-                width : 25,
-                height: 25
+                width : 50,
+                height: 50
             },
         viewImages:
             {
-                width : 25,
-                height: 25
+                width : 50,
+                height: 50
             },
         comments:
             {
-                width : 25,
-                height: 25
+                width : 50,
+                height: 50
             }
     }
 );
