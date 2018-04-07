@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {ScrollView, ActivityIndicator, TextInput, StyleSheet ,Switch,View,Text} from 'react-native';
 import { Tile, ListItem, Button } from 'react-native-elements';
+import {me} from '../config/data';
 
 class Me extends Component {
     handleSettingsPress = () => {
@@ -60,7 +61,7 @@ class Me extends Component {
             ,
             body:
                 JSON.stringify(
-                    "10f53f45-d49d-437c-bf36-fa51b87bd34d")
+                    this.props.userId)
         }).then((response) => response.json())
             .then((data) =>
             {
@@ -235,5 +236,5 @@ const styles = StyleSheet.create(
                 backgroundColor: 'ghostwhite'
             },
     });
-
+Me.defaultProps = { ...me };
 export default Me;

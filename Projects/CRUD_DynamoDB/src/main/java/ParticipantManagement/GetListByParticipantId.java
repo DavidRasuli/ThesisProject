@@ -6,6 +6,7 @@ import DataModel.Participant;
 import DataModel.ShoppingList;
 import DbUtil.DataAccess;
 import Responses.GetListByParticipantResponse;
+import Responses.ShoppingListWithItems;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
@@ -28,7 +29,7 @@ public static void main(String[] args) {
     public GetListByParticipantResponse handleRequest(String participantId, Context context) {
         Participant participant = null;
         GetListByParticipantResponse listByParticipantResponse = new GetListByParticipantResponse();
-        List<GetListByParticipantResponse.ShoppingListWithItems> shoppingListWithItemsList = new ArrayList<>();
+        List<ShoppingListWithItems> shoppingListWithItemsList = new ArrayList<>();
 
         try {
 
@@ -45,7 +46,7 @@ public static void main(String[] args) {
 
             for(String shoppingListId : participant.getShoppingListIds())
             {
-                GetListByParticipantResponse.ShoppingListWithItems shoppingListWithItems = listByParticipantResponse.new ShoppingListWithItems();
+                ShoppingListWithItems shoppingListWithItems = new ShoppingListWithItems();
 
                 ShoppingList shoppingList;
                 try

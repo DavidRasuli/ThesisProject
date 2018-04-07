@@ -6,7 +6,8 @@ import {
     Button, ListView,ActivityIndicator
 } from 'react-native';
 import { List, ListItem } from 'react-native-elements';
-import { shoppingLists } from '../config/data';
+import {me} from '../config/data';
+import Me from "./Me";
 
 class MyLists extends  Component{
 
@@ -35,7 +36,7 @@ class MyLists extends  Component{
             ,
             body:
                 JSON.stringify(
-                    "10f53f45-d49d-437c-bf36-fa51b87bd34d")
+                    this.props.userId)
         }).then((response) => response.json())
             .then((data) =>
             {
@@ -82,6 +83,7 @@ class MyLists extends  Component{
         );
     }
 }
+MyLists.defaultProps = { ...me };
 
 export default MyLists;
 

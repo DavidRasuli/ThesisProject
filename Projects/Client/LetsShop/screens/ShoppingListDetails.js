@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import { ScrollView,View,ListView ,Text,StyleSheet,Button, TouchableHighlight,Image,TextInput,Picker} from 'react-native';
 import CheckBox from 'react-native-check-box';
+import {me} from '../config/data';
 
 class ShoppingListDetails extends Component {
-
-
 
     constructor() {
 
         super();
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 != r2 || r1.available != r2.available });
 
 
 
@@ -19,7 +18,9 @@ class ShoppingListDetails extends Component {
             productName: 'Enter product',
             productQty: 'Quantity',
             measurementUnit : '#', //todo : to dropdownlist/selector
-
+            itemsAvailability : [],
+            isAdmin : false,
+            isActive : false,
 
             blankLeft_style : styles.blankLeft,
             blankRight_style : styles.blankRight,
@@ -39,16 +40,31 @@ class ShoppingListDetails extends Component {
     }
 
 
+
     fetchShoppingItems() {
 
         this.setState({
             shoppingListId : this.props.navigation.state.params.shoppingList.ID,
-            shoppingListDataSource: this.state.shoppingListDataSource.cloneWithRows(this.props.navigation.state.params.itemInLists)
+            shoppingListDataSource: this.state.shoppingListDataSource.cloneWithRows(this.props.navigation.state.params.itemInLists),
+            isAdmin : me.userId == this.props.navigation.state.params.shoppingList.shopperId,
+            isActive : this.props.navigation.state.params.shoppingList.active,
+            itemsAvailability : this.props.navigation.state.params.itemInLists.map((r) => {return {key : r.ID , value : r.available}})
         });
     }
 
     componentDidMount() {
         this.fetchShoppingItems();
+        this.interval = setInterval(
+            () =>
+            {
+                alert("about to call getShoppingLists ")
+                this.getShoppingLists();
+
+            }, 30000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     addItemClicked = () => {
@@ -182,6 +198,32 @@ class ShoppingListDetails extends Component {
         //move to participants activity
     }
 
+    FinishShopping = () =>
+    {
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/finishshopping";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    "shopperId": me.userId,
+                    "shoppingListId": this.state.shoppingListId
+
+                }),
+
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data.toString();
+                alert("Finished Shopping!");
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+    }
+
+
     onAddCommentClicked = () =>
     {
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/appenditemtoshoppinglist";
@@ -236,17 +278,43 @@ class ShoppingListDetails extends Component {
         return imageUrl;
     }
 
+    getShoppingLists = () => {
 
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/getlistbylistid";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify(
+                    this.props.navigation.state.params.shoppingList.ID)
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let shoppingListObj = data.shoppingListWithItems;
+                //alert('Data received (ShoppingListDetails):' +shoppingListObj[0].shoppingList.name )
 
-    updateItemAvailability = (available) =>
+                var newDs = [];
+                newDs = shoppingListObj.itemInLists.slice();
+
+                this.setState({
+                    shoppingListDataSource:this.state.shoppingListDataSource.cloneWithRows(newDs),
+                    isActive : shoppingListObj.shoppingList.active,
+
+                },function() {
+                    // do something with new state
+                    //alert('Component did mount (ShoppingListDetails):' +this.state.shoppingListDataSource.shoppingList.name )
+                });
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+    }
+
+    updateItemAvailability = (item) =>
     {
-        if(available)
-        {
-            return;// only update if a change occurred
-        }
         return;
-
-        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/appenditemtoshoppinglist";
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
         fetch( url,{
             method: 'POST',
             headers:
@@ -260,10 +328,11 @@ class ShoppingListDetails extends Component {
                     "measurementVolume" : item.productQty,
                     "measurementUnit" : item.measurementUnit,
                     "itemName" : item.productName,
-                    "available" : available,
+                    "available" : item.available,
                     "alternativeItem" : item.alternativeItem,
                     "comments" : item.comments
                 }),
+
         }).then((response) => response.json())
             .then((data) =>
             {
@@ -274,19 +343,15 @@ class ShoppingListDetails extends Component {
         });
     }
 
-    renderCheckBox(data) {
-        var leftText = data.name;
-        return (
-            <CheckBox
-                style={styles.itemAvailablityStyle}
-                onClick={()=>this.onClick(data)}
-                isChecked={data.checked}
-                leftText={leftText}
-                checkedImage={<Image source={require('./../Images/Check.png')} />}
-                //unCheckedImage={<Image source={require('../../page/my/img/ic_check_box_outline_blank.png')} style={this.props.theme.styles.tabBarSelectedIcon}/>}
-            />);
+    getValue(id)
+    {
+        for(var i =0;i<this.state.itemsAvailability.length;i++){
+            if(this.state.itemsAvailability[i].key == id )
+            {
+                return this.state.itemsAvailability[i].value;
+            }
+        }
     }
-
 
     renderRow(shoppingListRow, sectionId, rowId, highlightRow) {
 
@@ -312,8 +377,30 @@ class ShoppingListDetails extends Component {
 
                 <CheckBox
                     style={styles.itemAvailablityStyle}
-                    //onClick={()=>this.onClick(data)}
-                    isChecked={shoppingListRow.available}
+                    onClick={()=>
+                    {
+                        let itemsAvailability = this.state.itemsAvailability.map(el => (
+                            el.key===shoppingListRow.ID ? {...el, key: shoppingListRow.ID, value : !shoppingListRow.available }: el
+                        ))
+                        this.setState({ itemsAvailability : itemsAvailability });
+
+                        if(this.state.itemsAvailability[shoppingListRow.ID] == shoppingListRow.available) {
+                            this.updateItemAvailability(shoppingListRow);
+                        }
+
+                        //console.log(this.isChecked);
+                        //if(shoppingListRow.available != this.props.isChecked) {
+                        //    this.updateItemAvailability(shoppingListRow);
+                        //}
+                    }}
+
+                    isChecked={
+                        this.getValue(shoppingListRow.ID)
+
+                    }//{shoppingListRow.available}
+
+                    disabled={this.state.isActive == false || this.state.isAdmin == false}
+
                     //leftText={leftText}
                     checkedImage={<Image source={require('./../Images/Check.png')} />}
                     //unCheckedImage={<Image source={require('../../page/my/img/ic_check_box_outline_blank.png')} style={this.props.theme.styles.tabBarSelectedIcon}/>}
@@ -407,6 +494,21 @@ class ShoppingListDetails extends Component {
 
                     </View>
 
+                    <View>
+                        {this.state.isAdmin == true && this.state.isActive == true &&
+                        <Button title="Check out"
+                                onPress={() =>
+                                    this.FinishShopping()
+                                }
+                        />
+                        }
+                        {this.state.isActive == false &&
+                        <Text style={styles.finishShopping}>
+                            Shopping List Ended
+                        </Text>
+                        }
+                    </View>
+
                 </View>
             </ScrollView>
         );
@@ -415,6 +517,13 @@ class ShoppingListDetails extends Component {
 
 const styles = StyleSheet.create(
     {
+        finishShopping:
+            {
+                fontSize : 22,
+                flex:5,
+                padding:8,
+                justifyContent: 'center',
+            },
         myView:
             {
                 backgroundColor:'blue'
@@ -507,6 +616,8 @@ const styles = StyleSheet.create(
             }
     }
 );
+
+ShoppingListDetails.defaultProps = { ...me };
 
 export default ShoppingListDetails;
 
