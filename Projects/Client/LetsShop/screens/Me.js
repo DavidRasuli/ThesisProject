@@ -159,7 +159,7 @@ class Me extends Component {
                     {this.state.isEdit &&
 
                     <TextInput style={styles.data}
-                               value={this.state.email}
+                               placeholder={ (!this.state.email  || this.state.email == '') ? 'Enter your email' : this.state.email}                                placeholder='Enter your email' //add email validation
                                onChangeText ={(value) => this.setState({ email : value})}
                     />
                     }
@@ -180,9 +180,7 @@ class Me extends Component {
                     }
                     {this.state.isEdit &&
                     <TextInput style={styles.data}
-                               value={
-                                   this.state.nickName
-                               }
+                               placeholder={ (!this.state.nickName || this.state.nickName == '') ? 'Enter your nickname' : this.state.nickName} //add name validation
                                onChangeText ={
                                    (value) =>
                                        this.setState({

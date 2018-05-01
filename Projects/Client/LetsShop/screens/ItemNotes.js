@@ -65,9 +65,6 @@ class ItemNotes extends Component {
         var currentComment = 'SomeUser:' +this.state.comment;
         comments.push(currentComment);
 
-        debugger;
-
-
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
         fetch( url,{
             method: 'POST',

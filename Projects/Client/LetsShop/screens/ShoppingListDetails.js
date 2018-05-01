@@ -15,9 +15,9 @@ class ShoppingListDetails extends Component {
         this.state = {
             shoppingListId : null,
             shoppingListDataSource: ds,
-            productName: 'Enter product',
-            productQty: 'Quantity',
-            measurementUnit : '#', //todo : to dropdownlist/selector
+            productName: '',
+            productQty: '',
+            measurementUnit : '', //todo : to dropdownlist/selector
             itemsAvailability : [],
             isAdmin : false,
             isActive : false,
@@ -53,7 +53,9 @@ class ShoppingListDetails extends Component {
     }
 
     componentDidMount() {
+
         this.fetchShoppingItems();
+        return;
         this.interval = setInterval(
             () =>
             {
@@ -85,15 +87,15 @@ class ShoppingListDetails extends Component {
             }
         );
         this.setState({
-                productName_style: styles.productNameStyle
+                productName_style: styles.productNameStyle_NewProduct
             }
         );
         this.setState({
-                productQty_style: styles.productQtyStyle
+                productQty_style: styles.productQtyStyle_NewProduct
             }
         );
         this.setState({
-                measurementUnit_style: styles.measurementUnitStyle
+                measurementUnit_style: styles.measurementUnitStyle_NewProduct
             }
         );
 
@@ -255,14 +257,16 @@ class ShoppingListDetails extends Component {
     }
 
 
-    navigateToImages = (itemInList)=>{
-        this.props.navigation.navigate('ImagesDetail',{...itemInList});
+    navigateToImages = (itemInList,isAdmin)=>{
+        this.props.navigation.navigate('ImagesDetail',{...itemInList,isAdmin});
 
     };
 
+    /*
     navigateToComments = (itemInList)=>{
         this.props.navigation.navigate('Notes',{...itemInList});
     };
+    */
 
     getFirstPicture(shoppingListRow)
     {
@@ -313,7 +317,6 @@ class ShoppingListDetails extends Component {
 
     updateItemAvailability = (item) =>
     {
-        return;
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/updateiteminlist";
         fetch( url,{
             method: 'POST',
@@ -323,12 +326,12 @@ class ShoppingListDetails extends Component {
             body:
                 JSON.stringify({
                     "itemInListId": item.ID,
-                    "listId" : item.shoppingListId ,
+                    "listId" : item.listId ,
                     "imageUrls": item.urls,
-                    "measurementVolume" : item.productQty,
-                    "measurementUnit" : item.measurementUnit,
-                    "itemName" : item.productName,
-                    "available" : item.available,
+                    "measurementVolume" : item.measureVolume,
+                    "measurementUnit" : item.measureUnit,
+                    "itemName" : item.name,
+                    "available" : !item.available, // flip availability
                     "alternativeItem" : item.alternativeItem,
                     "comments" : item.comments
                 }),
@@ -361,19 +364,8 @@ class ShoppingListDetails extends Component {
 
             <View style={styles.row}>
 
-                <TouchableHighlight onPress={() => this.navigateToImages(shoppingListRow)}
-                                    style={this.state.plus_highlight}>
-                    <Image
 
-                        style={this.state.add_comment}
-                        source={this.getFirstPicture(shoppingListRow)}  //{require('./../Images/Images.png')}
-                    />
-                </TouchableHighlight>
-
-                <Text style={styles.productNameStyle}>{shoppingListRow.name}</Text>
-                <Text style={styles.productQtyStyle}>{shoppingListRow.measureVolume} </Text>
-                <Text style={styles.measurementUnitStyle}>{shoppingListRow.measureUnit}</Text>
-
+                <Text style={styles.productNameStyle}>{shoppingListRow.measureVolume} {shoppingListRow.measureUnit} : {shoppingListRow.name}</Text>
 
                 <CheckBox
                     style={styles.itemAvailablityStyle}
@@ -384,9 +376,19 @@ class ShoppingListDetails extends Component {
                         ))
                         this.setState({ itemsAvailability : itemsAvailability });
 
-                        if(this.state.itemsAvailability[shoppingListRow.ID] == shoppingListRow.available) {
-                            this.updateItemAvailability(shoppingListRow);
+                        var i=0;
+                        while(i<this.state.itemsAvailability.length)
+                        {
+                            if(this.state.itemsAvailability[i].key == shoppingListRow.ID) {
+                                if (this.state.itemsAvailability[i].value === shoppingListRow.available) {
+                                    this.updateItemAvailability(shoppingListRow);
+                                    i = this.state.itemsAvailability.length;
+                                }
+                            }
+                            i++;
                         }
+
+
 
                         //console.log(this.isChecked);
                         //if(shoppingListRow.available != this.props.isChecked) {
@@ -407,11 +409,11 @@ class ShoppingListDetails extends Component {
                 />
 
 
-                <TouchableHighlight onPress={() => this.navigateToComments(shoppingListRow)} style={this.state.plus_highlight}>
+                <TouchableHighlight onPress={() => this.navigateToImages(shoppingListRow,this.state.isAdmin)} style={this.state.plus_highlight}>
                     <Image
 
                         style={this.state.add_comment}
-                        source={require('./../Images/AddComment.png')}
+                        source={this.getFirstPicture(shoppingListRow)}
                     />
                 </TouchableHighlight>
             </View>
@@ -429,6 +431,7 @@ class ShoppingListDetails extends Component {
                     />
 
 
+                    {this.state.isActive == true &&
                     <View style={styles.row}>
 
                         <TouchableHighlight onPress={this.addItemClicked} style={this.state.plus_highlight}>
@@ -453,34 +456,37 @@ class ShoppingListDetails extends Component {
                         <TextInput
                             style={this.state.productName_style}
                             value={this.state.productName}
-                            onChangeText ={
+                            placeholder="Enter product"
+                            onChangeText={
                                 (value) =>
                                     this.setState({
-                                        productName : value
+                                        productName: value
                                     })}
                         />
 
                         <TextInput
                             style={this.state.productQty_style}
                             value={this.state.productQty}
-                            onChangeText ={
+                            placeholder="Quantity"
+                            onChangeText={
                                 (value) =>
                                     this.setState({
-                                        productQty : value
+                                        productQty: value
                                     })}
                         />
 
                         <TextInput
                             style={this.state.measurementUnit_style}
                             value={this.state.measurementUnit}
-                            onChangeText ={
+                            placeholder="#/lb/oz.."
+                            onChangeText={
                                 (value) =>
                                     this.setState({
-                                        measurementUnit : value
+                                        measurementUnit: value
                                     })}
                         />
 
-                        <TouchableHighlight onPress={this.onAddCommentClicked} style={this.state.minus_highlight} >
+                        <TouchableHighlight onPress={this.onAddCommentClicked} style={this.state.minus_highlight}>
                             <Image
 
                                 style={this.state.minus_image}
@@ -494,6 +500,7 @@ class ShoppingListDetails extends Component {
 
                     </View>
 
+                    }
                     <View>
                         {this.state.isAdmin == true && this.state.isActive == true &&
                         <Button title="Check out"
@@ -543,21 +550,29 @@ const styles = StyleSheet.create(
         productNameStyle:
             {
                 fontSize : 22,
+                flex:11,
+                padding:8,
+            },
+
+        productNameStyle_NewProduct:
+            {
+                fontSize : 15,
                 flex:5,
                 padding:8,
             },
-        productQtyStyle:
+        productQtyStyle_NewProduct:
             {
-                fontSize : 22,
+                fontSize : 15,
                 flex:2,
                 padding:2,
             },
-        measurementUnitStyle:
+        measurementUnitStyle_NewProduct:
             {
-                fontSize : 22,
+                fontSize : 15,
                 flex:2,
                 padding:2,
             },
+
         itemAvailablityStyle:
             {
                 flex:1,

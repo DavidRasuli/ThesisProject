@@ -1,0 +1,217 @@
+import React, { Component } from 'react';
+import {ScrollView, ActivityIndicator, TextInput, StyleSheet ,Switch,View,Text} from 'react-native';
+import { Tile, ListItem, Button } from 'react-native-elements';
+
+class Me extends Component {
+    handleSettingsPress = () => {
+        //this.props.navigation.navigate('Settings');
+        //https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging
+
+        if(this.state.isEdit == true)
+        {
+            this.setState({
+                settingsMode:"Edit Details",
+                isEdit : false
+            })
+            //update api
+            this.updateUser();
+            //set state to Edit Details
+
+        }
+        else //this.state.isEdit == false
+        {
+            this.setState({
+                settingsMode:"Done",
+                isEdit : true
+            });
+            //allow edit
+            //set state to Done
+
+        }
+
+
+    };
+    constructor()
+    {
+        super();
+        this.state = {
+            user : null,
+            ready : false,
+            isEdit : false,
+            settingsMode : "Edit Details"
+        }
+    }
+
+    componentDidMount()
+    {
+        this.getUser();
+    }
+
+    getUser = () => {
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/getparticipantbyid";
+          fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify(
+                "10f53f45-d49d-437c-bf36-fa51b87bd34d")
+        }).then((response) => response.json())
+              .then((data) =>
+        {
+            let participant = data.participant;
+            //alert(participant);
+            this.setState({
+                ready:true,
+                user:participant
+            });
+
+            /*
+            alert(data.participant.firstName);
+            this.state({
+                ready:true,
+                user:data.participant
+            });
+            */
+        }).catch((error) => {
+              alert("error : " +error);
+          });
+    }
+
+    /*
+    updateUser =() =>
+    {
+
+
+        debugger;
+
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/editparticipant";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    "participantId": this.state.user.ID,
+                    "nickName": this.state.user.nickName,
+                    "email" : this.state.user.email,
+                    "allowSettings" : this.state.user.showNotifications,
+                }),
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data.toString();
+                alert("response : "+JSON.stringify( res));
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+
+    }
+*/
+
+
+    render() {
+        if (!this.state.ready) {
+            return ( <ActivityIndicator/> );
+        }
+// here you already have the data to know if he has a session
+        return (
+
+            <ScrollView>
+
+                <Tile
+                    imageSrc={{uri: this.state.user.imageUrl}}
+                    featured
+                    title={`${this.state.user.firstName.toUpperCase()} ${this.state.user.lastName.toUpperCase()}`}
+                    caption={this.props.email}
+                />
+
+                <Button
+                    title={this.state.settingsMode}
+                    buttonStyle={{marginTop: 20}}
+                    onPress={this.handleSettingsPress}
+                />
+
+                    <View style={styles.row}>
+                        <Text style={styles.desc}>
+                            Email :
+                        </Text>
+
+                        {this.state.isEdit == false &&
+                            <Text style={styles.data}>
+                                {this.state.user.email.toUpperCase()}
+                            </Text>
+                         }
+
+                        {this.state.isEdit &&
+
+                            <TextInput style={styles.data}
+                                value={this.state.user.email.toUpperCase()}
+                                onChange={(value) => this.setState({ user: Object.assign({}, this.state.user, { email : value})})}
+                            />
+                        }
+                    </View>
+
+                    <View style={styles.row}>
+
+                        <Text style={styles.desc}>
+                            Nickname :
+                        </Text>
+
+                        {this.state.isEdit == false &&
+                            <Text style={styles.data}>
+                                {this.state.user.nickname.toUpperCase()}
+                            </Text>
+                        }
+                        {this.state.isEdit &&
+                            <TextInput style={styles.data}
+                                value={this.state.user.nickname.toUpperCase()}
+                                onChange={(value) => this.setState({ user: Object.assign({}, this.state.user, { nickname : value})})}
+                            />
+                        }
+                    </View>
+
+                    <View style={styles.row}>
+
+                        <Text style={styles.desc}>
+                            Allow notifications :
+                        </Text>
+
+                        <Switch
+                            style={styles.data}
+                            disabled={this.state.isEdit == false}
+                            value={this.state.user.showNotifications}
+                            onValueChange={(value) => this.setState({ user: Object.assign({}, this.state.user, { showNotifications: value})})}
+                        />
+
+                    </View>
+
+            </ScrollView>
+        );
+
+    }
+}
+const styles = StyleSheet.create(
+    {
+        desc:
+            {
+                flex:1,
+                padding:10,
+            },
+        data:
+            {
+                flex:2,
+                padding:10
+            },
+        row:
+            {
+                flexDirection:'row',
+                justifyContent:'center',
+                marginBottom:1,
+                backgroundColor: 'ghostwhite'
+            },
+    });
+
+export default Me;

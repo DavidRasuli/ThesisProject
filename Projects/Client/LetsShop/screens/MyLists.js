@@ -61,6 +61,20 @@ class MyLists extends  Component{
 
     };
 
+    getFirstPicture(shoppingList)
+    {
+        var imageUrl;
+        if(shoppingList.shoppingList.active )
+        {
+            imageUrl = require('./../Images/ActiveShopping.png');
+        }
+        else
+        {
+            imageUrl = require('./../Images/FinishedShopping.png');
+        }
+        return imageUrl;
+    }
+
     render() {
         if (!this.state.ready) {
             return ( <ActivityIndicator/> );
@@ -72,8 +86,9 @@ class MyLists extends  Component{
                     {this.state.shoppingListDataSource.map((shoppingList) => (
                         <ListItem
                             key={shoppingList.shoppingList.ID}
-                            //avatar={{ uri: shoppingList.shoppingList.active }}
-                            title={`${shoppingList.shoppingList.name.toUpperCase()} (${shoppingList.shoppingList.ID})`}
+                            avatar={this.getFirstPicture(shoppingList)}
+                            title={shoppingList.shoppingList.name.toUpperCase()}
+                            subtitle={shoppingList.shoppingList.creationDate.split('T')[0]}
                             onPress={() => this.onLearnMore(shoppingList)}
                         />
                     ))}
