@@ -31,7 +31,7 @@ public class CreateShoppingList implements RequestHandler<CreateListRequest, Str
                throw new Exception("No shopper with Id : " + request.getShopperId());
            }
 
-           ShoppingList shoppingList = new ShoppingList( request.getShopperId(), "Shopping List 1", true, request.getParticipantIds(),request.getStoreId());
+           ShoppingList shoppingList = new ShoppingList( request.getShopperId(), request.getName(), true, request.getParticipantIds(),request.getStoreId());
 
            DataAccess.getInstance().save(shoppingList);
            return String.format("Hello Address with id : ", shoppingList.getID());

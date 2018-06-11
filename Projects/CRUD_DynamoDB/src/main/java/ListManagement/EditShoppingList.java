@@ -7,11 +7,13 @@ import Responses.EditShoppingResponse;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
+import java.util.Arrays;
+
 public class EditShoppingList implements RequestHandler<EditShoppingRequest, EditShoppingResponse> {
 
     public static void main(String[] args)
     {
-        EditShoppingRequest listRequest = new EditShoppingRequest("10f53f45-d49d-437c-bf36-fa51b87bd34d","8426976b-ac2e-45b4-922a-3f86c1352abd","New Name 1");
+        EditShoppingRequest listRequest = new EditShoppingRequest("10f53f45-d49d-437c-bf36-fa51b87bd34d","8426976b-ac2e-45b4-922a-3f86c1352abd","New Name 1", Arrays.asList("10f53f45-d49d-437c-bf36-fa51b87bd34d"));
         EditShoppingList finishShopping = new EditShoppingList();
         EditShoppingResponse result = finishShopping.handleRequest(listRequest, null);
         System.out.println(result.getShoppingListId() +" \n"+result.getExceptionMessage());
@@ -36,6 +38,7 @@ public class EditShoppingList implements RequestHandler<EditShoppingRequest, Edi
                 throw new Exception("Shopper with ID : " + editShoppingRequest.getShopperId() + " is not the owner of the Shopping List");
             }
             shoppingList.setName(editShoppingRequest.getName());
+            shoppingList.adjustParticipantsListChanges(editShoppingRequest.getParticipantsIds());
             DataAccess.getInstance().save(shoppingList);
 
             finishShoppingResponse.setShoppingListId(editShoppingRequest.getShoppingListId());

@@ -200,6 +200,31 @@ class ShoppingListDetails extends Component {
         //move to participants activity
     }
 
+    DuplicateShoppingList = () =>
+    {
+        const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/duplicatelist";
+        fetch( url,{
+            method: 'POST',
+            headers:
+                new Headers({'Content-Type': 'application/json'})
+            ,
+            body:
+                JSON.stringify({
+                    "shopperId": me.userId,
+                    "originListId": this.state.shoppingListId,
+                    "newShoppingListName" : "duplicate"
+                }),
+
+        }).then((response) => response.json())
+            .then((data) =>
+            {
+                let res = data.toString();
+                alert(res);
+            }).catch((error) => {
+            alert("error : " +error);
+        });
+    }
+
     FinishShopping = () =>
     {
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/finishshopping";
@@ -425,6 +450,11 @@ class ShoppingListDetails extends Component {
         return (
             <ScrollView>
                 <View>
+                    <Button title="Duplicate"
+                            onPress={() =>
+                                this.DuplicateShoppingList()
+                            }
+                    />
                     <ListView
                         dataSource={this.state.shoppingListDataSource}
                         renderRow={this.renderRow.bind(this)}

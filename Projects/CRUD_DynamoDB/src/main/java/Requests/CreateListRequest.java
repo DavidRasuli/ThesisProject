@@ -23,6 +23,8 @@ public class CreateListRequest {
         this.storeId = store;
     }
 
+    public CreateListRequest(){}
+
     public String getShopperId() {
         return shopperId;
     }

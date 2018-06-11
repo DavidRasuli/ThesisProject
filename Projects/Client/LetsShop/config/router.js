@@ -39,13 +39,13 @@ export const Tabs = TabNavigator({
     Feed: {
         screen: MyListsStack,
         navigationOptions: {
-            tabBarLabel: 'Feed'
+            tabBarLabel: 'Shopping Lists'
         },
     },
     Me: {
         screen: Me,
         navigationOptions: {
-            tabBarLabel: 'Me'
+            tabBarLabel: 'Settings'
         },
     },
 });

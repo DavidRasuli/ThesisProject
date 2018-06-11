@@ -1,9 +1,12 @@
 package DataModel;
 
 import DateUtil.DateFormatting;
+import DbUtil.DataAccess;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
+import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @DynamoDBTable(tableName="ShoppingLists")
@@ -96,6 +99,29 @@ public class ShoppingList{
 		this.participantIds = participantIds;
 	}
 
+	public void adjustParticipantsListChanges(List<String> participantIds)
+	{
+		//remove existing participants which aren't included at the list
+		for (String participantId : this.participantIds)
+		{
+			if(participantIds.contains(participantId) == false) {
+				Participant p = DataAccess.getInstance().load(Participant.class, participantId);
+				p.getShoppingListIds().remove(this.ID);
+				DataAccess.getInstance().save(p);
+			}
+		}
+
+		//remove new participants which aren't included at the list
+		for (String participantId : participantIds)
+		{
+			if(this.participantIds.contains(participantId) == false) {
+				Participant p = DataAccess.getInstance().load(Participant.class, participantId);
+				p.getShoppingListIds().add(this.ID);
+				DataAccess.getInstance().save(p);
+			}
+		}
+		setParticipantIds(participantIds);
+	}
 
 	public void setShopperId(String shopperId) {
 		this.shopperId = shopperId;
@@ -126,6 +152,40 @@ public class ShoppingList{
 	public ShoppingList()
 	{
 		this.creationDate = LocalDateTime.now();
+		this.setEndedAt("");
+	}
+
+	public ShoppingList createClone(String shopperId,String shoppingListName)
+	{
+		ShoppingList shoppingList = new ShoppingList();
+		shoppingList.setActive(true);
+		shoppingList.setShopperId(shopperId);
+		shoppingList.setStoreId(this.storeId);
+		shoppingList.setName(shoppingListName);
+		DataAccess.getInstance().save(shoppingList);
+
+		List<String> listOfItemInListIds = new ArrayList<>();
+		List<String> participantListIds = new ArrayList<>();
+
+		participantListIds.add(shopperId);
+
+		for (String itemInListId : this.getItemInListIds())
+		{
+			ItemInList itemInList = DataAccess.getInstance().load(ItemInList.class,itemInListId);
+			if(itemInList != null)
+			{
+				ItemInList clonedItemInList = itemInList.cloneItemInList(shoppingList.ID);
+				if(clonedItemInList != null)
+				{
+					listOfItemInListIds.add(clonedItemInList.getID());
+				}
+			}
+		}
+
+		shoppingList.setItemInListIds(listOfItemInListIds);
+		shoppingList.setParticipantIds(participantListIds);
+		DataAccess.getInstance().save(shoppingList);
+		return shoppingList;
 	}
 
 }
