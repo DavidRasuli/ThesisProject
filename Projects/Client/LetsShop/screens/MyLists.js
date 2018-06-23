@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { List, ListItem } from 'react-native-elements';
 import {me} from '../config/data';
-import Me from "./Me";
 
 class MyLists extends  Component{
 
@@ -25,6 +24,11 @@ class MyLists extends  Component{
     componentDidMount() {
         this.getShoppingLists(); // Call API
     }
+
+    createShoppingList = () => {
+        this.props.navigation.navigate('NewListManagement');
+    }
+
 
     getShoppingLists = () => {
 
@@ -56,7 +60,7 @@ class MyLists extends  Component{
         });
     }
 
-    onLearnMore = (shoppingList)=>{
+    navigate = (shoppingList)=>{
       this.props.navigation.navigate('Details',{...shoppingList});
 
     };
@@ -82,6 +86,7 @@ class MyLists extends  Component{
         return (
 
             <ScrollView>
+
                 <List>
                     {this.state.shoppingListDataSource.map((shoppingList) => (
                         <ListItem
@@ -89,10 +94,17 @@ class MyLists extends  Component{
                             avatar={this.getFirstPicture(shoppingList)}
                             title={shoppingList.shoppingList.name.toUpperCase()}
                             subtitle={shoppingList.shoppingList.creationDate.split('T')[0]}
-                            onPress={() => this.onLearnMore(shoppingList)}
+                            onPress={() => this.navigate(shoppingList)}
                         />
                     ))}
                 </List>
+
+                <Button title="Create Shopping List"
+                        onPress={() =>
+                            this.createShoppingList()
+                        }
+                />
+
             </ScrollView>
 
         );

@@ -7,6 +7,7 @@ import Me from '../screens/Me';
 import ShoppingListDetails from '../screens/ShoppingListDetails';
 import PictureManager from "../screens/PictureManager";
 import ItemNotes from "../screens/ItemNotes"
+import ShoppingListManagement from "../screens/ShoppingListManagement";
 
 export const MyListsStack = StackNavigator({
     MyList:{
@@ -19,20 +20,27 @@ export const MyListsStack = StackNavigator({
         screen: ShoppingListDetails,
         navigationOptions: ({ navigation }) => ({
             title: `${navigation.state.params.shoppingList.name.toUpperCase()}`,
-        }), //D.R. : now we'd like to get the first and last name from the navigation , is thia
+        }),
     },
     ImagesDetail: {
         screen: PictureManager,
         navigationOptions: ({ navigation }) => ({
             title: `${navigation.state.params.name.toUpperCase()}`,
-        }), //D.R. : now we'd like to get the first and last name from the navigation , is thia
+        }),
     },
-    Notes : {
-        screen: ItemNotes,
+    ExistingListManagement : {
+        screen: ShoppingListManagement,
         navigationOptions: ({ navigation }) => ({
             title: `${navigation.state.params.name.toUpperCase()}`,
-        }), //
+        }),
+    },
+    NewListManagement : {
+        screen: ShoppingListManagement,
+        navigationOptions: () => ({
+            title: `New Shopping List`,
+        }),
     }
+
 });
 
 export const Tabs = TabNavigator({

@@ -200,7 +200,7 @@ class ShoppingListDetails extends Component {
         //move to participants activity
     }
 
-    DuplicateShoppingList = () =>
+    duplicateShoppingList = () =>
     {
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/duplicatelist";
         fetch( url,{
@@ -225,7 +225,12 @@ class ShoppingListDetails extends Component {
         });
     }
 
-    FinishShopping = () =>
+    editShoppingList = () =>
+    {
+        this.props.navigation.navigate('ExistingListManagement',{...this.props.navigation.state.params.shoppingList});
+    }
+
+    finishShopping = () =>
     {
         const url = "https://dn9tujddr2.execute-api.us-east-1.amazonaws.com/Staging/finishshopping";
         fetch( url,{
@@ -450,11 +455,15 @@ class ShoppingListDetails extends Component {
         return (
             <ScrollView>
                 <View>
-                    <Button title="Duplicate"
+
+                    {this.state.isAdmin == true && this.state.isActive == true &&
+                    <Button title="Edit"
                             onPress={() =>
-                                this.DuplicateShoppingList()
+                                this.editShoppingList()
                             }
                     />
+                    }
+
                     <ListView
                         dataSource={this.state.shoppingListDataSource}
                         renderRow={this.renderRow.bind(this)}
@@ -535,7 +544,7 @@ class ShoppingListDetails extends Component {
                         {this.state.isAdmin == true && this.state.isActive == true &&
                         <Button title="Check out"
                                 onPress={() =>
-                                    this.FinishShopping()
+                                    this.finishShopping()
                                 }
                         />
                         }
@@ -544,6 +553,13 @@ class ShoppingListDetails extends Component {
                             Shopping List Ended
                         </Text>
                         }
+
+                        <Button title="Duplicate"
+                                onPress={() =>
+                                    this.duplicateShoppingList()
+                                }
+                        />
+
                     </View>
 
                 </View>
